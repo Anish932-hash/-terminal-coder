@@ -1,0 +1,333 @@
+name: 🚀 Terminal Coder CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  PYTHON_VERSION_MIN: "3.10"
+  PYTHON_VERSION_MAX: "3.13"
+  POETRY_VERSION: "1.8.4"
+
+jobs:
+  # Code Quality and Linting
+  quality:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_MAX }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔧 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff black isort mypy pylint bandit safety
+
+      - name: 🎯 Run Ruff (fast linter)
+        run: ruff check . --output-format=github
+
+      - name: 🎨 Check code formatting with Black
+        run: black --check --diff .
+
+      - name: 📋 Check import sorting with isort
+        run: isort --check-only --diff .
+
+      - name: 🔍 Type checking with MyPy
+        run: mypy terminal_coder --ignore-missing-imports
+
+      - name: 🛡️ Security analysis with Bandit
+        run: bandit -r terminal_coder -f json -o bandit-report.json || true
+
+      - name: 🔒 Check dependencies for vulnerabilities
+        run: safety check --json --output safety-report.json || true
+
+      - name: 📊 Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  # Testing across Python versions
+  test:
+    name: 🧪 Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        exclude:
+          # Exclude some combinations to speed up CI
+          - os: macos-latest
+            python-version: "3.10"
+          - os: windows-latest
+            python-version: "3.10"
+
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt', '**/pyproject.toml') }}
+
+      - name: 🔧 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio pytest-xdist
+
+      - name: 🧪 Run tests with coverage
+        run: |
+          pytest tests/ \
+            --cov=terminal_coder \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            --durations=10 \
+            -v
+
+      - name: 📊 Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == env.PYTHON_VERSION_MAX
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: 📈 Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: |
+            htmlcov/
+            .coverage
+            coverage.xml
+
+  # Build and Package
+  build:
+    name: 📦 Build Package
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for setuptools_scm
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_MAX }}
+
+      - name: 🔧 Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine hatchling
+
+      - name: 🏗️ Build package
+        run: python -m build
+
+      - name: 🔍 Check package
+        run: twine check dist/*
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+  # Docker Build
+  docker:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 📋 Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: terminalcoder/terminal-coder
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏗️ Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Performance Tests
+  performance:
+    name: ⚡ Performance Tests
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_MAX }}
+
+      - name: 🔧 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-benchmark memory-profiler
+
+      - name: ⚡ Run performance tests
+        run: |
+          python -m pytest tests/test_performance.py \
+            --benchmark-only \
+            --benchmark-json=benchmark.json
+        continue-on-error: true
+
+      - name: 📊 Upload performance results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: benchmark.json
+
+  # Release
+  release:
+    name: 🚀 Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: [quality, test, build]
+    environment: release
+    permissions:
+      id-token: write  # For trusted publishing to PyPI
+      contents: write
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: 🚀 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
+      - name: 🏷️ Update release with artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          generate_release_notes: true
+
+  # Post-deployment tests
+  integration:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    needs: [release]
+    steps:
+      - name: 📚 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION_MAX }}
+
+      - name: 📦 Install from PyPI
+        run: |
+          pip install terminal-coder
+          terminal-coder --version
+          terminal-coder doctor
+
+      - name: 🧪 Run integration tests
+        run: |
+          # Test CLI functionality
+          terminal-coder config --show
+          terminal-coder project list
+          echo "✅ Integration tests passed!"
+
+  # Notification
+  notify:
+    name: 📢 Notify
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [quality, test, build]
+    steps:
+      - name: 📢 Notify on success
+        if: needs.quality.result == 'success' && needs.test.result == 'success' && needs.build.result == 'success'
+        run: |
+          echo "🎉 All CI checks passed!"
+          echo "- Code quality: ✅"
+          echo "- Tests: ✅"
+          echo "- Build: ✅"
+
+      - name: 📢 Notify on failure
+        if: needs.quality.result == 'failure' || needs.test.result == 'failure' || needs.build.result == 'failure'
+        run: |
+          echo "❌ Some CI checks failed!"
+          echo "- Code quality: ${{ needs.quality.result }}"
+          echo "- Tests: ${{ needs.test.result }}"
+          echo "- Build: ${{ needs.build.result }}"
+          exit 1

@@ -1,0 +1,321 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "terminal-coder-linux"
+version = "2.0.0"
+description = "Advanced AI-Powered Linux Development Terminal - Optimized for Linux Systems"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Terminal Coder Linux Team", email = "linux@terminalcoder.dev"},
+]
+maintainers = [
+    {name = "Terminal Coder Linux Team", email = "linux@terminalcoder.dev"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Environment :: X11 Applications",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Topic :: System :: System Shells",
+    "Topic :: Terminals",
+    "Topic :: Text Editors :: Integrated Development Environments (IDE)",
+    "Typing :: Typed",
+]
+keywords = [
+    "ai",
+    "assistant",
+    "cli",
+    "code",
+    "coding",
+    "development",
+    "ide",
+    "programming",
+    "terminal",
+    "tui",
+]
+requires-python = ">=3.10"
+dependencies = [
+    # Core dependencies - Latest versions
+    "rich>=13.9.4",               # Advanced terminal UI library
+    "click>=8.1.7",               # Command line interface creation
+    "typer>=0.15.1",              # Modern CLI framework
+    "asyncio-mqtt>=0.16.2",       # Async MQTT support
+    "aiohttp>=3.10.11",           # Async HTTP client/server
+    "aiofiles>=24.1.0",           # Async file operations
+
+    # AI API integrations - Latest versions
+    "openai>=1.57.2",             # OpenAI API client
+    "anthropic>=0.40.0",          # Anthropic Claude API client
+    "google-generativeai>=0.8.3", # Google Gemini API client
+    "cohere>=5.11.4",             # Cohere API client
+
+    # Data handling - Latest versions
+    "pydantic>=2.10.3",          # Data validation and settings
+    "pydantic-settings>=2.7.0",  # Settings management
+    "python-dateutil>=2.9.0",    # Date parsing utilities
+    "pytz>=2024.2",              # Timezone support
+
+    # Configuration formats - Latest versions
+    "pyyaml>=6.0.2",             # YAML configuration support
+    "tomli>=2.1.0",              # TOML parsing for Python 3.11+
+    "tomli-w>=1.1.0",            # TOML writing support
+
+    # Security and encryption - Latest versions
+    "cryptography>=44.0.0",      # Encryption for sensitive data
+    "bcrypt>=4.2.1",             # Password hashing
+    "python-jose[cryptography]>=3.3.0",  # JWT token handling
+
+    # File and project management - Latest versions
+    "watchdog>=6.0.0",           # File system monitoring
+    "gitpython>=3.1.47",         # Git integration
+    "pathspec>=0.12.1",          # Path specification matching
+    "python-magic>=0.4.27",      # File type detection
+
+    # Web and API utilities - Latest versions
+    "requests>=2.32.3",          # HTTP requests library
+    "httpx>=0.28.1",            # Modern HTTP client
+    "fastapi>=0.115.6",         # Fast API framework
+    "uvicorn[standard]>=0.32.1", # ASGI server with standard extras
+
+    # Terminal and system utilities - Latest versions
+    "psutil>=6.1.0",             # System and process utilities
+    "colorama>=0.4.6",           # Cross-platform colored terminal text
+    "termcolor>=2.5.0",          # Terminal coloring
+    "keyboard>=0.13.5",          # Keyboard hook library
+    "pyperclip>=1.9.0",          # Cross-platform clipboard operations
+
+    # Development utilities - Latest versions
+    "python-dotenv>=1.0.1",      # Environment variable loading
+    "tqdm>=4.67.1",              # Progress bars
+    "humanize>=4.11.0",          # Human-readable numbers/times
+    "tabulate>=0.9.0",           # Pretty-print tabular data
+
+    # Modern TUI framework
+    "textual>=0.89.0",           # Modern TUI framework
+
+    # Linux-specific dependencies - Essential for Linux optimization
+    "dbus-python>=1.3.2",       # Linux D-Bus bindings
+    "distro>=1.9.0",             # Linux distribution detection
+    "pexpect>=4.9.0",            # Advanced process control for Linux terminals
+    "sh>=2.0.7",                 # Pythonic shell command execution
+    "click-completion>=0.5.2",   # Shell completion for Linux terminals
+    "pyinotify>=0.9.6",          # Linux filesystem event monitoring
+]
+
+[project.optional-dependencies]
+# Development dependencies
+dev = [
+    "pytest>=8.3.4",            # Testing framework
+    "pytest-asyncio>=0.24.0",   # Async testing support
+    "coverage>=7.6.9",          # Code coverage
+    "pytest-cov>=6.0.0",        # Coverage plugin for pytest
+    "pytest-xdist>=3.6.1",      # Parallel test execution
+    "bandit>=1.8.0",             # Security linting
+    "pre-commit>=4.0.1",         # Pre-commit hooks
+    "mypy>=1.13.0",              # Static type checking
+]
+
+# Code quality and formatting
+quality = [
+    "black>=24.10.0",            # Python code formatter
+    "isort>=5.13.2",             # Import sorting
+    "pylint>=3.3.2",             # Python linting
+    "flake8>=7.1.1",             # Python style checking
+    "ruff>=0.8.4",               # Modern, fast Python linter
+    "autopep8>=2.3.1",           # Python code formatting
+]
+
+# Type checking
+typing = [
+    "types-requests>=2.32.0.20241016",  # Type stubs for requests
+    "types-PyYAML>=6.0.12.20240917",   # Type stubs for PyYAML
+    "types-aiofiles>=24.1.0.20240626",  # Type stubs for aiofiles
+]
+
+# Data science and analysis (optional)
+datascience = [
+    "jupyter>=1.1.1",           # Jupyter notebooks
+    "ipython>=8.30.0",           # Enhanced Python shell
+    "matplotlib>=3.9.2",        # Plotting library
+    "pandas>=2.2.3",            # Data manipulation
+    "numpy>=2.1.3",             # Numerical computing
+]
+
+# Documentation generation
+docs = [
+    "sphinx>=8.1.3",             # Documentation generator
+    "mkdocs>=1.6.1",             # Static site generator
+    "mkdocs-material>=9.5.48",   # Material theme for MkDocs
+]
+
+# Database support (optional)
+database = [
+    "sqlalchemy>=2.0.36",        # SQL toolkit and ORM
+    "aiosqlite>=0.20.0",         # Async SQLite support
+]
+
+# Cloud services (optional)
+cloud = [
+    "boto3>=1.35.77",            # AWS SDK
+    "azure-storage-blob>=12.24.0",  # Azure storage
+    "google-cloud-storage>=2.18.2",  # Google Cloud storage
+]
+
+# Containerization support
+containers = [
+    "docker>=7.1.0",            # Docker API client
+    "kubernetes>=31.0.0",       # Kubernetes API client
+]
+
+# Complete installation with all features
+all = [
+    "terminal-coder[dev,quality,typing,datascience,docs,database,cloud,containers]"
+]
+
+[project.scripts]
+terminal-coder = "terminal_coder.main:main"
+tcoder = "terminal_coder.main:main"
+
+[project.urls]
+Homepage = "https://github.com/terminalcoder/terminal_coder"
+Documentation = "https://docs.terminalcoder.dev"
+Repository = "https://github.com/terminalcoder/terminal_coder"
+Issues = "https://github.com/terminalcoder/terminal_coder/issues"
+Changelog = "https://github.com/terminalcoder/terminal_coder/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "terminal_coder/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["terminal_coder"]
+
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311', 'py312', 'py313']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["terminal_coder"]
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "C0111",  # missing-docstring
+    "R0903",  # too-few-public-methods
+    "R0913",  # too-many-arguments
+    "W0613",  # unused-argument
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--cov=terminal_coder",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+]
+asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["terminal_coder"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["B018", "B019"]
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101", "B601"]

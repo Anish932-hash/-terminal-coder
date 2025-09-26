@@ -1,0 +1,141 @@
+/* Terminal Coder Modern TUI Styles */
+
+Screen {
+    layout: vertical;
+    background: $surface;
+}
+
+.title {
+    text-align: center;
+    text-style: bold;
+    color: $accent;
+    margin: 1;
+    padding: 1;
+}
+
+.subtitle {
+    text-align: center;
+    color: $text-muted;
+    margin-bottom: 2;
+}
+
+.menu {
+    align: center middle;
+    width: 50%;
+    height: auto;
+    margin: 2;
+}
+
+.menu Button {
+    width: 100%;
+    margin: 1;
+    min-height: 3;
+}
+
+Container {
+    align: center middle;
+    padding: 1;
+}
+
+.sidebar {
+    width: 25%;
+    dock: left;
+    padding: 1;
+    background: $panel;
+}
+
+.main {
+    width: 75%;
+    padding: 1;
+}
+
+.form {
+    width: 60%;
+    align: center middle;
+    padding: 2;
+}
+
+.form Input {
+    width: 100%;
+    margin: 1;
+}
+
+.form Button {
+    width: 1fr;
+    margin: 1;
+}
+
+.chat {
+    width: 70%;
+    height: 100%;
+}
+
+.ai_settings {
+    width: 30%;
+    dock: right;
+    padding: 1;
+    background: $panel;
+}
+
+.input_area {
+    height: auto;
+    dock: bottom;
+    padding: 1;
+}
+
+.input_area Input {
+    width: 1fr;
+}
+
+.input_area Button {
+    width: auto;
+    margin-left: 1;
+}
+
+DataTable {
+    height: 1fr;
+}
+
+RichLog {
+    height: 1fr;
+    border: solid $primary;
+    scrollbar-gutter: stable;
+}
+
+ProgressBar {
+    width: 100%;
+    margin: 1;
+}
+
+TabbedContent {
+    height: 1fr;
+}
+
+/* Button variants */
+Button.primary {
+    background: $primary;
+}
+
+Button.success {
+    background: $success;
+}
+
+Button.warning {
+    background: $warning;
+}
+
+Button.error {
+    background: $error;
+}
+
+/* Dark theme colors */
+Screen {
+    --primary: #0078d4;
+    --success: #16a085;
+    --warning: #f39c12;
+    --error: #e74c3c;
+    --accent: #9b59b6;
+    --surface: #1e1e1e;
+    --panel: #2d2d2d;
+    --text-muted: #888888;
+}
